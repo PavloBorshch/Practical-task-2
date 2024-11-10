@@ -9,13 +9,14 @@
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.stream.Collectors;
 
 public class Main {
     public static void main(String[] args) {
+        long startTime = System.currentTimeMillis();
+
         List<Double> listOfNumbers = randomArraySet(0.5, 99.5, 40, 60);
 
-        System.out.println("Початковий CopyOnWriteArraySet: " + listOfNumbers);
+        System.out.println("Початковий CopyOnWriteArraySet: " + listOfNumbers + '\n');
 
         // Використовуємо ExecutorService з трьома потоками
         ExecutorService executorService = Executors.newFixedThreadPool(3);
@@ -26,12 +27,16 @@ public class Main {
         List<Double> part2 = listOfNumbers.subList(partitionSize, partitionSize * 2);
         List<Double> part3 = listOfNumbers.subList(partitionSize * 2, listOfNumbers.size());
 
+        System.out.println("Частина 1: " + part1);
+        System.out.println("Частина 2: " + part2);
+        System.out.println("Частина 3: " + part3 + '\n');
+
         // Створюємо списки для частин CopyOnWriteArraySet
         CopyOnWriteArraySet<Double> setPart1 = new CopyOnWriteArraySet<>(part1);
         CopyOnWriteArraySet<Double> setPart2 = new CopyOnWriteArraySet<>(part2);
         CopyOnWriteArraySet<Double> setPart3 = new CopyOnWriteArraySet<>(part3);
 
-        long startTime = System.currentTimeMillis();
+        // long startTime = System.currentTimeMillis();
 
         // Виконуємо завдання для кожної частини
         List<Future<CopyOnWriteArraySet<Double>>> futures = new ArrayList<>();
@@ -48,10 +53,10 @@ public class Main {
 
                 // Перевіряємо статус виконання
                 if (future.isDone()) {
-                    System.out.println("Частина " + (i + 1) + " оброблена: " + result);
+                    System.out.println("Частина " + (i + 1) + " зроблена: " + result);
                 }
                 if (future.isCancelled()) {
-                    System.out.println("Частина " + (i + 1) + " була відмінена.");
+                    System.out.println("Частина " + (i + 1) + " була скасована.");
                 }
 
             } catch (InterruptedException | ExecutionException e) {
@@ -64,7 +69,7 @@ public class Main {
 
         // Час виконання програми
         long endTime = System.currentTimeMillis();
-        System.out.println("Час виконання програми: " + (endTime - startTime) + " мс");
+        System.out.println("Час виконання всієї програми: " + (endTime - startTime) + " мс");
     }
 
     private static List<Double> randomArraySet(double rangeMin, double rangeMax, int minNumbers, int maxNumbers) {
@@ -82,21 +87,5 @@ public class Main {
         }
 
         return arraySet;
-    }
-
-    // Callable для обчислення квадратів чисел
-    static class SquareCalculator implements Callable<CopyOnWriteArraySet<Double>> {
-        private final CopyOnWriteArraySet<Double> numbers;
-
-        public SquareCalculator(CopyOnWriteArraySet<Double> numbers) {
-            this.numbers = numbers;
-        }
-
-        @Override
-        public CopyOnWriteArraySet<Double> call() {
-            return numbers.stream()
-                    .map(number -> Math.round(number * number * 100.0) / 100.0) // Обчислюємо квадрат і округлюємо до 2 знаків
-                    .collect(Collectors.toCollection(CopyOnWriteArraySet::new));
-        }
     }
 }
